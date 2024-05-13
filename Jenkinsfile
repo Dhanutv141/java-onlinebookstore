@@ -1,4 +1,4 @@
-    pipeline {
+pipeline {
     agent any
 	tools {
 	    maven 'Maven3'
@@ -20,11 +20,33 @@
 
         stage('Deploy') {
             steps {
-                deploy adapters: [tomcat9(credentialsId: '8157d156-4094-40d1-a6f7-440ba239a4bf', path: '', url: 'http://3.84.255.189:8080/')], contextPath: null, war: '**/*.war'
+                deploy adapters: [tomcat9(credentialsId: 'd708dee3-94e3-42ec-b737-3aa7b8184202', path: '', url: 'http://18.234.46.170:8080/')], contextPath: null, war: '**/*.war'
+                
 				
   
             }
         }
+		stage('Notification') {
+            steps {
+   				
+                slackSend (
+                    channel: '#jenkins',
+                    message: 'Deployment successful! :tada:',
+                )
+            }
+        }
     }
+
+    post {
+        success {
+            
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            
+            echo 'Pipeline execution failed!'
+        }
+    }
+	}
 				
 }
