@@ -20,10 +20,8 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                ddeploy adapters: [tomcat9(credentialsId: '1baf45f6-e3f4-4b17-91bd-f3099220f5e4', path: '', url: 'http://35.174.6.253:8080/')], contextPath: null, war: '**/*.war'
-				
-  
-            }
+                deploy adapters: [tomcat9(credentialsId: 'f33859d0-c8d1-41b5-be15-e833f362e00c', path: '', url: 'http://54.172.98.140:8080/')], contextPath: null, war: '**/*.war'
+                           }
         }
 		stage('Notification') {
             steps {
