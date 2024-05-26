@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Sonarqube Analysis') {
             steps {
-                sh """$SCANNER_HOME/bin/sonar-scanner\
+                sh """$SCANNER_HOME/bin/sonarqube\
                     -X \
                     -Dsonar.projectKey=sonar_project \
                     -Dsonar.projectName=sonar_project \
