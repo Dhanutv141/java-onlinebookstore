@@ -4,7 +4,7 @@ pipeline {
         maven 'Maven3'
     }
     environment {
-        SCANNER_HOME = tool 'sonar-scanner'
+        SCANNER_HOME = tool 'sonarqube'
     }
     stages {
         stage('Git checkout') {
@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Sonarqube Analysis') {
             steps {
-                sh """$SCANNER_HOME/bin/sonar-scanner \
+                sh """$SCANNER_HOME/bin/sonarqube \
                     -X \
                     -Dsonar.projectKey=sonar_project \
                     -Dsonar.projectName=sonar_project \
