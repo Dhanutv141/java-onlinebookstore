@@ -1,53 +1,45 @@
 pipeline {
     agent any
-	tools {
-	    maven 'Maven3'
-	}
+    tools {
+        jdk 'jdk11'
+        maven 'Maven3'
+    }
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
     stages {
-        stage('checkout') {
+        stage('Git checkout') {
             steps {
-                // Checkout the code from your repository
-                git branch: 'main', url: 'https://github.com/Dhanutv141/java-onlinebookstore.git'
+               git branch: 'main', url: 'https://github.com/Dhanutv141/java-onlinebookstore.git'
             }
         }
-        
-        stage('Build') {
+        stage('Compile') {
             steps {
-                // Build your artifact (e.g., compile code, run tests)
-                sh "mvn clean install"
+                sh 'mvn clean compile'
             }
         }
-
-        stage('Deploy') {
+        stage('Sonarqube Analysis') {
             steps {
-                deploy adapters: [tomcat9(credentialsId: '6af9e59b-963e-4cf2-beab-cebe1f2745fc', path: '', url: 'http://54.90.4.183:8080/')], contextPath: null, war: '**/*.war'
-                
-				
-  
+                sh """$SCANNER_HOME/bin/sonar-scanner \
+                    -X \
+                    -Dsonar.projectKey=sonar_project \
+                    -Dsonar.projectName=sonar_project \
+                    -Dsonar.java.binaries=target/classes \
+                    -Dsonar.url=http://34.229.137.146:9000 \
+                    -Dsonar.login=sqp_30a52e907937ce591076db9122e53da1f88d7f72"""
             }
         }
-		stage('Notification') {
+        stage('OWASP SCAN') {
             steps {
-   				
-                slackSend (
-                    channel: 'random',
-                    message: 'Deployment successful! :tada:',
-                )
+                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'Dp'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        stage('Build Application') {
+            steps {
+                sh "mvn clean install -DskipTests"
             }
         }
     }
-
-    post {
-        success {
-            
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            
-            echo 'Pipeline execution failed!'
-        }
-    }
-	}
-				
 }
 
