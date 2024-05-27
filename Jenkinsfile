@@ -1,44 +1,52 @@
 pipeline {
     agent any
-    tools {
-        maven 'Maven3'
-    }
-    environment {
-        SCANNER_HOME = tool 'sonarqube'
-    }
+	tools {
+	    maven 'Maven3'
+	}
     stages {
-        stage('Git checkout') {
+        stage('checkout') {
             steps {
-               git branch: 'main', url: 'https://github.com/Dhanutv141/java-onlinebookstore.git'
+                // Checkout the code from your repository
+                git branch: 'main', url: 'https://github.com/Dhanutv141/java-onlinebookstore.git'
             }
         }
-        stage('Compile') {
+        
+        stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                // Build your artifact (e.g., compile code, run tests)
+                sh "mvn clean install"
             }
         }
-        stage('Sonarqube Analysis') {
+
+        stage('Deploy') {
             steps {
-                sh """$SCANNER_HOME/bin/sonar-scanner\
-                    -X \
-                    -Dsonar.projectKey=sonar_project \
-                    -Dsonar.projectName=sonar_project \
-                    -Dsonar.java.binaries=target/classes \
-                    -Dsonar.url=http://34.229.137.146:9000 \
-                    -Dsonar.login=sqp_30a52e907937ce591076db9122e53da1f88d7f72"""
+                deploy adapters: [tomcat9(credentialsId: '6af9e59b-963e-4cf2-beab-cebe1f2745fc', path: '', url: 'http://54.90.4.183:8080/')], contextPath: null, war: '**/*.war'
+                
+				
+  
             }
         }
-        stage('OWASP SCAN') {
+		stage('Notification') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'Dp'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
-        stage('Build Application') {
-            steps {
-                sh "mvn clean install -DskipTests"
+   				
+                slackSend (
+                    channel: 'random',
+                    message: 'Deployment successful! :tada:',
+                )
             }
         }
     }
-}
 
+    post {
+        success {
+            
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            
+            echo 'Pipeline execution failed!'
+        }
+    }
+	}
+				
+}
